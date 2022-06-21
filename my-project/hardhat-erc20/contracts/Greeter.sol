@@ -1,22 +1,35 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
+contract ERC20 {
+    string public name ;
+    string public symbol ;
+    uint256 public supply ;
+    
+    mapping(address=>uint256) public balances ;
 
-import "hardhat/console.sol";
-
-contract Greeter {
-    string private greeting;
-
-    constructor(string memory _greeting) {
-        console.log("Deploying a Greeter with greeting:", _greeting);
-        greeting = _greeting;
+    constructor(string memory _name, string memory _symbol) {
+        _name = name ;
+        _symbol = symbol ;
     }
 
-    function greet() public view returns (string memory) {
-        return greeting;
+    function decimals() external pure returns (uint8) {
+        return 18;
     }
 
-    function setGreeting(string memory _greeting) public {
-        console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-        greeting = _greeting;
+    function mint() public payable returns (bool) {
+        require(msg.sender != address(0) , "Recipient Address Invalid");
+        require(supply > 0 , "No More Token Can Be Minted");
+        balances[msg.sender] += msg.value ;
+        supply -= msg.value ;
+        return true ;
+    }
+
+    function transfer(address from, address to, uint256 amount) external returns (bool) {
+        uint256 inwallet = balances[from] ;
+        require(inwallet >= amount , "Insufficient Funds");
+        require(msg.sender == from, "Access Denied");
+        balances[from] = inwallet - amount ;
+        balances[to] += amount ;
+        return true;
     }
 }
